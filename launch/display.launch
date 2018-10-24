@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+  <param name="robot_description" textfile="$(find sawyer_oscr)/urdf/sawyer.urdf" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <arg name="config_file" value="$(find sawyer_oscr)/config/sawyer.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false" output="screen" args="-d $(arg config_file)"/>
+
+  <param name="reference_frame" value="base" />
+
+</launch>
