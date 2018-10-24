@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+#
+# Test the model of the Sawyer robot
+#
+# To use it:
+#     1) roslaunch sawyer_oscr sawyer.launch
+#     2) + Option 1 (interactive):
+#              roscd sawyer_oscr/scripts
+#              ipython -i sawyer_model
+#        + Option 2:
+#              rosrun sawyer_oscr sawyer_model
+#
+
+
+from oscr.ros_robot import RosRobot
+import numpy as np
+
+
+if __name__ == '__main__':
+
+    # This robot does not have a floating base
+    fbase = False
+    # Frequency
+    f = 100.0
+    # Robot simulation instance (Backend: 'pin' or 'rbdl')
+    robot = RosRobot('sawyerModelPy', 'sawyer_oscr',
+                     '/urdf/sawyer.urdf', f, fbase, 'pin')
+    # Print robot model information
+    robot.printModelInfo()
+
+    # Joint configuration
+    q = np.array([[0., -0.785, 0., 1.51, 0., -0.67, 0.]]).T
+    robot.update(q)
+
+    # Print positions
+    position1 = robot.linkPosition(robot.mlink['right_l6'])
+    position2 = robot.linkPosition(robot.mlink['right_l3'])
+    print "Joint configuration:", q[:,0].T
+    print "Link 7 (end effector) position: ", position1[:,0].T
+    print "Link 4 (elbow) position: ", position2[:,0].T
+
+    # Ball markers
+    robot.initRobotBallMarkers(['RED','GREEN'], ['right_l6','right_l3'])
+    # Frame markers
+    robot.initRobotFrameMarkers([1.0, 1.0],['right_l6','right_l3'])
+
+    # Example of joint motion
+    for k in range(1000):
+        q[1] = q[1] + 0.001
+        q[2] = q[2] - 0.001
+        robot.updateWithMarkers(q)
+        robot.rate.sleep()

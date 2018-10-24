@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+#
+# Generate kinematic motion to control the position/orientation of the Sawyer
+# robot
+#
+# To use it:
+#     1) roslaunch sawyer_oscr display.launch
+#     2) + Option 1 (interactive):
+#          roscd sawyer_oscr/scripts/motion; ipython -i sawyer_motion
+#        + Option 2:
+#          rosrun sawyer_oscr sawyer_motion_py
+#
+
+import numpy as np
+import rospy
+import intera_interface
+from oscr.ros_kine_sim import RosKineSim
+from oscr.utils import incPoseLocal, setPose, incPosition
+from sawyer_robot import SawyerRobot
+
+
+if __name__ == '__main__':
+
+    # This robot does not have a floating base
+    fbase = False
+    # Frequency
+    f = 100.0
+    # Robot simulation instance (choose as backend 'pin' or 'rbdl')
+    sim = RosKineSim('sawyerMotionPy', 'sawyer_oscr',
+                     '/urdf/sawyer.urdf', f, fbase, 'pin', type_robot='gazebo',
+                     show_markers=True)
+    sim.robot.joint_pub = SawyerRobot()
+
+    # Gripper
+    gripper = intera_interface.Gripper('right_gripper')
+    gripper.calibrate()
+    # vgripper = 0.5*gripper.MAX_POSITION*(jgripper+1.0)
+    gripper.set_position(gripper.MAX_POSITION)
+    
+    # Get the initial joint configuration
+    rospy.sleep(0.1)
+    q = sim.robot.joint_pub.getJointState()
+    # Update the internal model with the initial configuration
+    sim.update(q)
+
+    # Initialize kinematic solver: use 'HQP' (default), 'NS' or 'WQP'
+    sim.initKineSolver(q, 'NS')
+
+    # Tasks
+    sim.initKineTaskPose('right_l6', 'pose', 'Hand', 1.0)
+    # Set desired pose for the Hand (end effector)
+    currentPoseHand = sim.task['Hand'].getSensedValue()
+    # desiredPoseHand = incPoseLocal(currentPoseHand,
+    #                                (0.0, 0.0, 0.10),
+    #                                (0.0, (0.,0.,1.)))
+    # (-70.0, (0.,1.,0.)))
+    # desiredPosHand = setPose((0.2, 0.15, 0.8),(50,(1,0,0)))
+    # sim.task['Hand'].setDesiredValue(desiredPoseHand)
+    # Add task to the solver
+    sim.pushTask(sim.task['Hand'])
+
+    # When using an interactive session (with ipython) and a single task,
+    # it is recommended to use doTask. After task completion, update the
+    # desired pose and call doTask again
+    desiredPoseHand = np.copy(currentPoseHand)
+    desiredPoseHand[0,0] = 0.448
+    desiredPoseHand[1,0] = 0.145
+    desiredPoseHand[2,0] = 0.06
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[2,0] = 0.01
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    gripper.set_position(0.65*gripper.MAX_POSITION)
+    desiredPoseHand[2,0] = 0.10
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[1,0] = -0.30
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[2,0] = 0.02
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    gripper.open()
+    desiredPoseHand[2,0] = 0.10
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[1,0] = 0.075
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+
+    # desiredPoseHand[0,0] = 0.448
+    # desiredPoseHand[1,0] = 0.145
+    desiredPoseHand[2,0] = 0.06
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[2,0] = 0.01
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    gripper.set_position(0.65*gripper.MAX_POSITION)
+    desiredPoseHand[2,0] = 0.10
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[1,0] = -0.30-0.07
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[2,0] = 0.02
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    gripper.open()
+    desiredPoseHand[2,0] = 0.10
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[1,0] = 0.005
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+
+
+    desiredPoseHand[2,0] = 0.06
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[2,0] = 0.01
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    gripper.set_position(0.65*gripper.MAX_POSITION)
+    desiredPoseHand[2,0] = 0.10
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[1,0] = -0.30-0.07-0.07
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[2,0] = 0.02
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    gripper.open()
+    desiredPoseHand[2,0] = 0.10
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+    desiredPoseHand[1,0] = 0.0
+    sim.doTask('Hand', desiredPoseHand, 0.005)
+
+
