@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>sawyer_oscr</name>
+  <version>0.0.1</version>
+  <description>Package to control Sawyer using the OSCR library</description>
+  <maintainer email="oramos@todo.todo">Oscar Ramos</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>sawyer_description</exec_depend>
+  <exec_depend>gazebo</exec_depend>
+  <exec_depend>sawyer_gazebo</exec_depend>
+  
+</package>
