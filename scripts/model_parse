@@ -3,28 +3,37 @@
 # Test the model of the Sawyer robot
 #
 # To use it:
-#     1) roslaunch sawyer_oscr sawyer.launch
+#     1) roslaunch sawyer_oscr display.launch
 #     2) + Option 1 (interactive):
 #              roscd sawyer_oscr/scripts
-#              ipython -i sawyer_model
+#              ipython -i model_parse
 #        + Option 2:
-#              rosrun sawyer_oscr sawyer_model
+#              rosrun sawyer_oscr model_parse
 #
 
 
-from oscr.ros_robot import RosRobot
 import numpy as np
+from optparse import OptionParser
+from oscr.ros_robot import RosRobot
 
 
 if __name__ == '__main__':
 
+    # Parse the arguments
+    parser = OptionParser()
+    parser.add_option("--back", dest="back", default="pin",
+                      help="back can be pin (default) or rbdl")
+    (options, args) = parser.parse_args()
+    # Backend: 'pin' (default) or 'rbdl'
+    backend = options.back
+    
     # This robot does not have a floating base
     fbase = False
     # Frequency
     f = 100.0
-    # Robot simulation instance (Backend: 'pin' or 'rbdl')
+    # Robot simulation instance
     robot = RosRobot('sawyerModelPy', 'sawyer_oscr',
-                     '/urdf/sawyer.urdf', f, fbase, 'pin')
+                     '/urdf/sawyer.urdf', f, fbase, backend)
     # Print robot model information
     robot.printModelInfo()
 
