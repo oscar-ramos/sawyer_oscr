@@ -6,61 +6,58 @@
 # To use it:
 #     1) roslaunch sawyer_oscr display.launch
 #     2) + Option 1 (interactive):
-#          roscd sawyer_oscr/scripts/motion; ipython -i sawyer_motion
+#              roscd sawyer_oscr/scripts
+#              ipython -i motion_ns
 #        + Option 2:
-#          rosrun sawyer_oscr sawyer_motion_py
+#              rosrun sawyer_oscr motion_ns
 #
 
 
-import rospy
+from optparse import OptionParser
 import numpy as np
+import rospy
 
 from oscr.ros_kine_sim import RosKineSim
 from oscr.utils import incPoseLocal, setPose, incPosition
 
-# Two different motions (1 or 2)
-# * flag = 1: moves the end effector to a given pose
-# * flag = 2: moves the elbow close to a given pose keeping the end effector
-#             without motion
-flag = 2
 
 if __name__ == '__main__':
 
+    # Parse the arguments
+    parser = OptionParser()
+    parser.add_option("--back", dest="back", default="pin",
+                      help="back can be pin (default) or rbdl")
+    parser.add_option("--type", dest="flag", default="1",
+                      help="type can be 1 (default) or 2")
+    (options, args) = parser.parse_args()
+    # Backend: 'pin' (default) or 'rbdl'
+    backend = options.back
+    # Flag for the types of motions:
+    #   1: moves the elbow keeping the end effector without motion
+    #   2: moves the end effector to a given pose
+    flag = eval(options.flag)
+    
     # This robot does not have a floating base
     fbase = False
     # Frequency
     f = 100.0
     # Robot simulation instance (choose as backend 'pin' or 'rbdl')
     sim = RosKineSim('sawyerMotionPy', 'sawyer_oscr',
-                     '/urdf/sawyer.urdf', f, fbase, 'pin',
+                     '/urdf/sawyer.urdf', f, fbase, backend,
                      show_markers=True)
 
     # Set initial joint configuration
     if (flag==1):
+        q = np.array([[0., -0.42, 0., -1.64, 0., 0.57, 0.]]).T
+    elif (flag==2):
         q = np.array([[-0.04166, -1.02583, 0.02937, 2.17518, -0.06703,
                        0.39684, 1.76596]]).T
-    elif (flag==2):
-        q = np.array([[0., -0.42, 0., -1.64, 0., 0.57, 0.]]).T
     sim.update(q)
 
     # Initialize kinematic solver: use 'HQP' (default), 'NS' or 'WQP'
     sim.initKineSolver(q, 'NS')
 
     if (flag==1):
-        # Tasks
-        sim.initKineTaskPose('right_l6', 'pose', 'Hand', 1.0)
-        # Set desired pose for the Hand (end effector)
-        currentPoseHand = sim.task['Hand'].getSensedValue()
-        desiredPoseHand = incPoseLocal(currentPoseHand,
-                                       (-0.15, 0.15, -0.15),
-                                       (10.0, (0.,0.,1.)))
-                                       # (-70.0, (0.,1.,0.)))
-        # desiredPosHand = setPose((0.2, 0.15, 0.8),(50,(1,0,0)))
-        sim.task['Hand'].setDesiredValue(desiredPoseHand)
-        # Add task to the solver
-        sim.pushTask(sim.task['Hand'])
-
-    elif (flag==2):
         # Tasks
         sim.initKineTaskPose('right_l6', 'pose', 'Hand', 1.0, show_path=False)
         sim.initKineTaskPose('right_l3', 'position', 'Elbow', 1.0)
@@ -75,19 +72,28 @@ if __name__ == '__main__':
         # Add task to the solver
         sim.pushTask(sim.task['Hand'])
         sim.pushTask(sim.task['Elbow'])
-
-    if (flag==1):
-        # When using an interactive session (with ipython) and a single task,
-        # it is recommended to use doTask. After task completion, update the
-        # desired pose and call doTask again
-        sim.doTask('Hand', desiredPoseHand, 0.005)
-
-    elif (flag==2):
         # When using rosrun (noninteractive) the following is recommended
         while not rospy.is_shutdown():
             qdes = sim.getPositionControl(q)
             sim.update(qdes)
             q = qdes.copy()
             sim.rate.sleep()
+    
+    elif (flag==2):
+        # Tasks
+        sim.initKineTaskPose('right_l6', 'pose', 'Hand', 1.0)
+        # Set desired pose for the Hand (end effector)
+        currentPoseHand = sim.task['Hand'].getSensedValue()
+        desiredPoseHand = incPoseLocal(currentPoseHand,
+                                       (0.15, 0.15, 0.15),
+                                       (0.0, (0.,1.,0.)))
+        # desiredPosHand = setPose((0.2, 0.15, 0.8),(50,(1,0,0)))
+        sim.task['Hand'].setDesiredValue(desiredPoseHand)
+        # Add task to the solver
+        sim.pushTask(sim.task['Hand'])
 
+        # When using an interactive session (with ipython) and a single task,
+        # it is recommended to use doTask. After task completion, update the
+        # desired pose and call doTask again
+        sim.doTask('Hand', desiredPoseHand, 0.005)
 
