@@ -18,6 +18,7 @@ import numpy as np
 import rospy
 
 from oscr.ros_kine_sim import RosKineSim
+from oscr.ros_logs import RosLogs
 from oscr.utils import incPoseLocal, setPose, incPosition
 
 
@@ -61,6 +62,11 @@ if __name__ == '__main__':
         # Tasks
         sim.initKineTaskPose('right_l6', 'pose', 'Hand', 1.0, show_path=False)
         sim.initKineTaskPose('right_l3', 'position', 'Elbow', 1.0)
+        # Logs
+        log = RosLogs('../data/', 'sawyer_ns_', f, False)
+        log.addTask(sim.task['Hand'])
+        log.addTask(sim.task['Elbow'])
+
         # Keep the hand (end effector) on place
         sim.task['Hand'].keep(1.0)
         # Set desired position for Elbow
@@ -74,10 +80,13 @@ if __name__ == '__main__':
         sim.pushTask(sim.task['Elbow'])
         # When using rosrun (noninteractive) the following is recommended
         while not rospy.is_shutdown():
+        #for i in range(250):
+            log.save(q)
             qdes = sim.getPositionControl(q)
             sim.update(qdes)
             q = qdes.copy()
             sim.rate.sleep()
+        log.close()
     
     elif (flag==2):
         # Tasks
