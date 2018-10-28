@@ -7,6 +7,6 @@
   </include>
 
   <!-- Start the Sawyer world and set the initial joint configuration -->
-  <node pkg="sawyer_oscr" type="sawyer_table_world2.py" name="sawyer_table" />
+  <node pkg="sawyer_oscr" type="table_block_world.py" name="table_block" />
 
 </launch>

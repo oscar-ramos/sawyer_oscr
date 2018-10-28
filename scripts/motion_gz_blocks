@@ -4,11 +4,12 @@
 # robot
 #
 # To use it:
-#     1) roslaunch sawyer_oscr display.launch
+#     1) roslaunch sawyer_oscr gz_table_blocks.launch
 #     2) + Option 1 (interactive):
-#          roscd sawyer_oscr/scripts/motion; ipython -i sawyer_motion
+#              roscd sawyer_oscr/scripts
+#              ipython -i motion_gz_blocks
 #        + Option 2:
-#          rosrun sawyer_oscr sawyer_motion_py
+#              rosrun sawyer_oscr motion_gz_blocks
 #
 
 import numpy as np
@@ -54,8 +55,6 @@ if __name__ == '__main__':
     #                                (0.0, 0.0, 0.10),
     #                                (0.0, (0.,0.,1.)))
     # (-70.0, (0.,1.,0.)))
-    # desiredPosHand = setPose((0.2, 0.15, 0.8),(50,(1,0,0)))
-    # sim.task['Hand'].setDesiredValue(desiredPoseHand)
     # Add task to the solver
     sim.pushTask(sim.task['Hand'])
 
@@ -82,8 +81,6 @@ if __name__ == '__main__':
     desiredPoseHand[1,0] = 0.075
     sim.doTask('Hand', desiredPoseHand, 0.005)
 
-    # desiredPoseHand[0,0] = 0.448
-    # desiredPoseHand[1,0] = 0.145
     desiredPoseHand[2,0] = 0.06
     sim.doTask('Hand', desiredPoseHand, 0.005)
     desiredPoseHand[2,0] = 0.01
@@ -100,7 +97,6 @@ if __name__ == '__main__':
     sim.doTask('Hand', desiredPoseHand, 0.005)
     desiredPoseHand[1,0] = 0.005
     sim.doTask('Hand', desiredPoseHand, 0.005)
-
 
     desiredPoseHand[2,0] = 0.06
     sim.doTask('Hand', desiredPoseHand, 0.005)
