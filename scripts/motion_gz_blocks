@@ -15,7 +15,9 @@
 import numpy as np
 import rospy
 import intera_interface
+
 from oscr.ros_kine_sim import RosKineSim
+from oscr.ros_logs import RosLogs
 from oscr.utils import incPoseLocal, setPose, incPosition
 from sawyer_robot import SawyerRobot
 
@@ -49,6 +51,9 @@ if __name__ == '__main__':
 
     # Tasks
     sim.initKineTaskPose('right_l6', 'pose', 'Hand', 1.0)
+    # Logs
+    log = RosLogs('../data/', 'sawyer_gz_', f, False)
+    log.addTask(sim.task['Hand'])
     # Set desired pose for the Hand (end effector)
     currentPoseHand = sim.task['Hand'].getSensedValue()
     # desiredPoseHand = incPoseLocal(currentPoseHand,
@@ -65,54 +70,55 @@ if __name__ == '__main__':
     desiredPoseHand[0,0] = 0.448
     desiredPoseHand[1,0] = 0.145
     desiredPoseHand[2,0] = 0.06
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[2,0] = 0.01
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     gripper.set_position(0.65*gripper.MAX_POSITION)
     desiredPoseHand[2,0] = 0.10
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[1,0] = -0.30
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[2,0] = 0.02
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     gripper.open()
     desiredPoseHand[2,0] = 0.10
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[1,0] = 0.075
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
 
     desiredPoseHand[2,0] = 0.06
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[2,0] = 0.01
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     gripper.set_position(0.65*gripper.MAX_POSITION)
     desiredPoseHand[2,0] = 0.10
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[1,0] = -0.30-0.07
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[2,0] = 0.02
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     gripper.open()
     desiredPoseHand[2,0] = 0.10
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[1,0] = 0.005
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
 
     desiredPoseHand[2,0] = 0.06
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[2,0] = 0.01
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     gripper.set_position(0.65*gripper.MAX_POSITION)
     desiredPoseHand[2,0] = 0.10
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[1,0] = -0.30-0.07-0.07
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[2,0] = 0.02
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     gripper.open()
     desiredPoseHand[2,0] = 0.10
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
     desiredPoseHand[1,0] = 0.0
-    sim.doTask('Hand', desiredPoseHand, 0.005)
+    sim.doTask('Hand', desiredPoseHand, 0.005, log=log)
 
+    log.close()
 
